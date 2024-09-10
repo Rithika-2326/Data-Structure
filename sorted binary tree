@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define the structure for a node in the binary search tree
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+// Function to create a new node with given data
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (!newNode) {
+        printf("Memory allocation error\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a new node into the binary search tree
+Node* insertNode(Node* root, int data) {
+    if (root == NULL) {
+        return createNode(data);
+    }
+
+    if (data < root->data) {
+        root->left = insertNode(root->left, data);
+    } else if (data > root->data) {
+        root->right = insertNode(root->right, data);
+    }
+
+    // If data is equal to root->data, we do nothing (no duplicates allowed)
+    return root;
+}
+
+// Function to perform an in-order traversal of the tree
+void inOrderTraversal(Node* root) {
+    if (root != NULL) {
+        inOrderTraversal(root->left);     // Visit left subtree
+        printf("%d ", root->data);        // Print node data
+        inOrderTraversal(root->right);    // Visit right subtree
+    }
+}
+
+// Function to free the memory allocated for the tree
+void freeTree(Node* root) {
+    if (root != NULL) {
+        freeTree(root->left);
+        freeTree(root->right);
+        free(root);
+    }
+}
+
+int main() {
+    Node* root = NULL;
+    int numNodes, value;
+
+    printf("Enter the number of nodes you want to insert: ");
+    scanf("%d", &numNodes);
+
+    for (int i = 0; i < numNodes; i++) {
+        printf("Enter node value %d: ", i + 1);
+        scanf("%d", &value);
+        root = insertNode(root, value);
+    }
+
+    printf("In-order traversal of the binary search tree (sorted order): ");
+    inOrderTraversal(root);
+    printf("\n");
+
+    // Free the allocated memory
+    freeTree(root);
+
+    return 0;
+}
