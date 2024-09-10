@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+typedef struct QueueNode {
+    Node* treeNode;
+    struct QueueNode* next;
+} QueueNode;
+
+typedef struct Queue {
+    QueueNode* front;
+    QueueNode* rear;
+} Queue;
+
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+QueueNode* createQueueNode(Node* treeNode) {
+    QueueNode* newQueueNode = (QueueNode*)malloc(sizeof(QueueNode));
+    newQueueNode->treeNode = treeNode;
+    newQueueNode->next = NULL;
+    return newQueueNode;
+}
+
+void initializeQueue(Queue* queue) {
+    queue->front = queue->rear = NULL;
+}
+
+int isQueueEmpty(Queue* queue) {
+    return queue->front == NULL;
+}
+
+void enqueue(Queue* queue, Node* treeNode) {
+    QueueNode* newQueueNode = createQueueNode(treeNode);
+    if (isQueueEmpty(queue)) {
+        queue->front = queue->rear = newQueueNode;
+    } else {
+        queue->rear->next = newQueueNode;
+        queue->rear = newQueueNode;
+    }
+}
+
+Node* dequeue(Queue* queue) {
+    if (isQueueEmpty(queue)) {
+        return NULL;
+    }
+    QueueNode* temp = queue->front;
+    Node* treeNode = temp->treeNode;
+    queue->front = queue->front->next;
+    if (queue->front == NULL) {
+        queue->rear = NULL;
+    }
+    free(temp);
+    return treeNode;
+}
+
+Node* insertNode(Node* root, int data) {
+    if (root == NULL) {
+        return createNode(data);
+    }
+    if (data < root->data) {
+        root->left = insertNode(root->left, data);
+    } else {
+        root->right = insertNode(root->right, data);
+    }
+    return root;
+}
+
+void levelOrderTraversal(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    Queue queue;
+    initializeQueue(&queue);
+    enqueue(&queue, root);
+
+    while (!isQueueEmpty(&queue)) {
+        Node* current = dequeue(&queue);
+        printf("%d ", current->data);
+
+        if (current->left != NULL) {
+            enqueue(&queue, current->left);
+        }
+        if (current->right != NULL) {
+            enqueue(&queue, current->right);
+        }
+    }
+}
+
+
+void freeTree(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+    freeTree(root->left);
+    freeTree(root->right);
+    free(root);
+}
+
+int main() {
+    Node* root = NULL;
+    int choice, data;
+
+    while (1) {
+        printf("\nBinary Search Tree Operations:\n");
+        printf("1. Insert an element\n");
+        printf("2. Print level-order traversal of the tree\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the value to insert: ");
+                scanf("%d", &data);
+                root = insertNode(root, data);
+                printf("Value %d inserted.\n", data);
+                break;
+
+            case 2:
+                printf("Level-order Traversal: ");
+                levelOrderTraversal(root);
+                printf("\n");
+                break;
+
+            case 3:
+                freeTree(root);
+                printf("Exiting...\n");
+                return 0;
+
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    }
+
+    return 0;
+}
